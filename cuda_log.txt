@@ -1,0 +1,21 @@
+
+2024.3.31
+基本上确认了如何分离cuda代码和cpp代码
+
+
+
+2024.3.30
+
+要在本机上运行，并测试，就需要使用demo，因此就需要修改cmakelists
+而demo中检测图片命令行启动有问题，暂时改为内置图片。
+
+因此cmakelists中demo设置为on,find_package 中添加PATHS opencv的路径。
+另外，为了支持cuda，以及 optional compilation 需要添加宏定义语句和启用cuda，因此也需要修改cmakelists
+
+原设置：
+option(ENABLE_NEON "whether use neon, if use arm please set it on" OFF)
+option(ENABLE_AVX512 "use avx512" OFF)
+option(ENABLE_AVX2 "use avx2" ON)
+option(DEMO "build the demo" ON)
+option(USE_OPENMP "Use OpenMP" ON)
+

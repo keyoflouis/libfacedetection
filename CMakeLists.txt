@@ -1,13 +1,14 @@
 # CMakeLists for libfacedetectcnn
 
-project(libfacedetection)
+project(libfacedetection LANGUAGES CXX CUDA)
 
 cmake_minimum_required(VERSION 2.8.12)
 
 option(ENABLE_NEON "whether use neon, if use arm please set it on" OFF)
 option(ENABLE_AVX512 "use avx512" OFF)
 option(ENABLE_AVX2 "use avx2" ON)
-option(DEMO "build the demo" OFF)
+option(ENABLE_CUDA "enable cuda surpport" ON)
+option(DEMO "build the demo" ON)
 option(USE_OPENMP "Use OpenMP" ON)
 
 if (BUILD_SHARED_LIBS)
@@ -82,6 +83,8 @@ IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 ENDIF()
 
+
+
 if(ENABLE_AVX512)
 	add_definitions(-D_ENABLE_AVX512)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx512bw")
@@ -153,7 +156,7 @@ install(FILES "${CMAKE_BINARY_DIR}/${fdt_lib_name}ConfigVersion.cmake" DESTINATI
 
 # Create demo. OpenCV is requred.
 if (DEMO)
-    find_package(OpenCV REQUIRED)
+    find_package(OpenCV REQUIRED PATHS "D:/Dependencies/opencv/opencv/build/x64/vc16/lib")
     include_directories(${OpenCV_INCLUDE_DIRS})
 
     add_executable(detect-image-demo ${fdt_base_dir}/example/detect-image.cpp)
