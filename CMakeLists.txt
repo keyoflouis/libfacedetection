@@ -4,6 +4,7 @@ project(libfacedetection)
 
 cmake_minimum_required(VERSION 2.8.12)
 
+option(ENABLE_CUDA "enable cuda surpport" ON)
 option(ENABLE_NEON "whether use neon, if use arm please set it on" OFF)
 option(ENABLE_AVX512 "use avx512" OFF)
 option(ENABLE_AVX2 "use avx2" ON)
@@ -56,7 +57,15 @@ SET(fdt_inc_dir    ${fdt_base_dir}/src)
 
 SET(fdt_lib_name   facedetection)
 
-FILE(GLOB_RECURSE fdt_source_files ${fdt_src_dir}/*.cpp)
+if(ENABLE_CUDA)
+    enable_language(CUDA)
+    if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+    set(CMAKE_CUDA_ARCHITECTURES 86)
+    endif()
+    FILE(GLOB_RECURSE fdt_source_files ${fdt_src_dir}/*.cpp ${fdt_src_dir}/*.cu)
+else()
+    FILE(GLOB_RECURSE fdt_source_files ${fdt_src_dir}/*.cpp)
+endif()
 LIST(SORT         fdt_source_files)
 
 SET(INSTALLHEADER_FILES ${fdt_inc_dir}/facedetectcnn.h)
@@ -81,6 +90,10 @@ IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
     #use -O3 to speedup
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 ENDIF()
+
+if(ENABLE_CUDA)
+    add_definitions(-D_ENABLE_CUDA)
+endif()
 
 if(ENABLE_AVX512)
 	add_definitions(-D_ENABLE_AVX512)
@@ -153,7 +166,11 @@ install(FILES "${CMAKE_BINARY_DIR}/${fdt_lib_name}ConfigVersion.cmake" DESTINATI
 
 # Create demo. OpenCV is requred.
 if (DEMO)
+<<<<<<< HEAD
     find_package(OpenCV REQUIRED PATHS "D:\\Dependencies\\opencv\\opencv\\build\\x64\\vc16\\lib")
+=======
+    find_package(OpenCV REQUIRED PATHS "D:/Dependencies/opencv/opencv/build/x64/vc16/lib")
+>>>>>>> 3b198cf0ad4132594f2112c5631ec7e998c0d0aa
     include_directories(${OpenCV_INCLUDE_DIRS})
 
     add_executable(detect-image-demo ${fdt_base_dir}/example/detect-image.cpp)
@@ -195,6 +212,7 @@ if (GSTREAMER)
 
 endif()
 
+message("CUDA = ${ENABLE_CUDA}")
 message("CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 message("LINKER_FLAGS: ${CMAKE_EXE_LINKER_FLAGS}")
 message("AVX512 = ${ENABLE_AVX512}")
