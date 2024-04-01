@@ -36,6 +36,10 @@ or tort (including negligence or otherwise) arising in any way out of
 the use of this software, even if advised of the possibility of such damage.
 */
 
+#ifdef _ENABLE_CUDA
+    #include"../cuda_model/cuda_fonc.cuh"
+#endif
+
 #include "facedetectcnn.h"
 #include <cmath>
 #include <float.h> //for FLT_EPSION
@@ -139,6 +143,12 @@ inline float dotProduct(const float * p1, const float * p2, int num)
         sum_float_x16 = _mm512_add_ps(sum_float_x16, _mm512_mul_ps(a_float_x16, b_float_x16));
     }
    sum = _mm512_reduce_add_ps(sum_float_x16);
+#elif defined(_ENABLE_CUDA)
+    product();
+    for(int i = 0; i < num; i++)
+    {
+        sum += (p1[i] * p2[i]);
+    }
 #elif defined(_ENABLE_AVX2)
     __m256 a_float_x8, b_float_x8;
     __m256 sum_float_x8 = _mm256_setzero_ps();
