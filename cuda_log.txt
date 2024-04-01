@@ -5,15 +5,11 @@ if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
 endif()
 而set(CUDA_ARCHITECTURES 86)就不行?
 
-<<<<<<< HEAD
 直接将cuda文件加到target中里行不通，报了一个
 A single input file is required for a non-link phase when an output file is specified的错误
 重置了一次，这次试试模块化，这次以防万一，，，
-=======
-if(ENABLE_CUDA)
-    enable_language(CUDA)
-    if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
 
+大概需要，cmake的model怎么用
 
 2024.3.30
 
@@ -29,7 +25,3 @@ option(ENABLE_AVX512 "use avx512" OFF)
 option(ENABLE_AVX2 "use avx2" ON)
 option(DEMO "build the demo" ON)
 option(USE_OPENMP "Use OpenMP" ON)
-<<<<<<< HEAD
-=======
-
->>>>>>> 3b198cf0ad4132594f2112c5631ec7e998c0d0aa
