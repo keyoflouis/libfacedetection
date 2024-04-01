@@ -1,4 +1,22 @@
 
+2024.4.1
+为什么这样就可以被正确设置
+if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+    set(CMAKE_CUDA_ARCHITECTURES 86)
+endif()
+而set(CUDA_ARCHITECTURES 86)就不行?
+
+if(ENABLE_CUDA)
+    enable_language(CUDA)
+    if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+    set(CMAKE_CUDA_ARCHITECTURES 86)
+    endif()
+    FILE(GLOB_RECURSE fdt_source_files ${fdt_src_dir}/*.cpp ${fdt_src_dir}/*.cu)
+else()
+    FILE(GLOB_RECURSE fdt_source_files ${fdt_src_dir}/*.cpp)
+endif()
+
+
 2024.3.31
 基本上确认了如何分离cuda代码和cpp代码
 
