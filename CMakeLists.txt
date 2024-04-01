@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 2.8.12)
 option(ENABLE_CUDA "enable cuda surpport" ON)
 option(ENABLE_NEON "whether use neon, if use arm please set it on" OFF)
 option(ENABLE_AVX512 "use avx512" OFF)
-option(ENABLE_AVX2 "use avx2" ON)
+option(ENABLE_AVX2 "use avx2" OFF)
 option(DEMO "build the demo" ON)
 option(USE_OPENMP "Use OpenMP" ON)
 
@@ -62,10 +62,16 @@ if(ENABLE_CUDA)
     if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
     set(CMAKE_CUDA_ARCHITECTURES 86)
     endif()
-    FILE(GLOB_RECURSE fdt_source_files ${fdt_src_dir}/*.cpp ${fdt_src_dir}/*.cu)
-else()
-    FILE(GLOB_RECURSE fdt_source_files ${fdt_src_dir}/*.cpp)
+    add_subdirectory(cuda_model)
+
+    
 endif()
+
+FILE(GLOB_RECURSE fdt_source_files 
+    ${fdt_src_dir}/facedetectcnn-data.cpp
+    ${fdt_src_dir}/facedetectcnn-model.cpp
+    ${fdt_src_dir}/facedetectcnn.cpp )
+
 LIST(SORT         fdt_source_files)
 
 SET(INSTALLHEADER_FILES ${fdt_inc_dir}/facedetectcnn.h)
@@ -126,6 +132,9 @@ include(GNUInstallDirs)
 
 # Create a library
 ADD_LIBRARY(${fdt_lib_name} ${fdt_source_files} ${INSTALLHEADER_FILES})
+if(ENABLE_CUDA)
+    target_link_libraries(facedetection PRIVATE cuda_lib)
+endif()
 
 # Generate export header
 GENERATE_EXPORT_HEADER(${fdt_lib_name})
@@ -141,7 +150,7 @@ set_target_properties(${fdt_lib_name} PROPERTIES
     PUBLIC_HEADER "${INSTALLHEADER_FILES}" # Install head files
     VERSION ${BUILD_VERSION}
    )
-
+#[[
 # Install target
 INSTALL(TARGETS ${fdt_lib_name}
     EXPORT ${fdt_lib_name}Config
@@ -163,7 +172,7 @@ write_basic_package_version_file(
     VERSION ${BUILD_VERSION}
     COMPATIBILITY AnyNewerVersion)
 install(FILES "${CMAKE_BINARY_DIR}/${fdt_lib_name}ConfigVersion.cmake" DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${fdt_lib_name}")
-
+]]#
 # Create demo. OpenCV is requred.
 if (DEMO)
     find_package(OpenCV REQUIRED PATHS "D:\\Dependencies\\opencv\\opencv\\build\\x64\\vc16\\lib")
