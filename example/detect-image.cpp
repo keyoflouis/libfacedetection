@@ -48,6 +48,7 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+    /*
     if(argc != 2)
     {
         printf("Usage: %s <image_file_name>\n", argv[0]);
@@ -61,7 +62,13 @@ int main(int argc, char* argv[])
 		fprintf(stderr, "Can not load the image file %s.\n", argv[1]);
 		return -1;
 	}
-
+    */
+   	Mat image = imread("D:/777bd4cbbef0f4c3de84b9badbb4da70.png"); 
+	if(image.empty())
+	{
+		fprintf(stderr, "Can not load the image file %s.\n", argv[1]);
+		return -1;
+	}
 	int * pResults = NULL; 
     //pBuffer is used in the detection functions.
     //If you call functions in multiple threads, please create one buffer for each thread!
