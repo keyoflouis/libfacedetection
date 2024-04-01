@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 3b198cf0ad4132594f2112c5631ec7e998c0d0aa
 2024.4.1
 为什么这样就可以被正确设置
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
@@ -13,23 +9,10 @@ endif()
 直接将cuda文件加到target中里行不通，报了一个
 A single input file is required for a non-link phase when an output file is specified的错误
 重置了一次，这次试试模块化，这次以防万一，，，
-先改好基本要改的。
 =======
 if(ENABLE_CUDA)
     enable_language(CUDA)
     if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-    set(CMAKE_CUDA_ARCHITECTURES 86)
-    endif()
-    FILE(GLOB_RECURSE fdt_source_files ${fdt_src_dir}/*.cpp ${fdt_src_dir}/*.cu)
-else()
-    FILE(GLOB_RECURSE fdt_source_files ${fdt_src_dir}/*.cpp)
-endif()
-
->>>>>>> 3b198cf0ad4132594f2112c5631ec7e998c0d0aa
-
-2024.3.31
-基本上确认了如何分离cuda代码和cpp代码
-
 
 
 2024.3.30

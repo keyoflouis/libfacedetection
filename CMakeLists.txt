@@ -166,11 +166,7 @@ install(FILES "${CMAKE_BINARY_DIR}/${fdt_lib_name}ConfigVersion.cmake" DESTINATI
 
 # Create demo. OpenCV is requred.
 if (DEMO)
-<<<<<<< HEAD
     find_package(OpenCV REQUIRED PATHS "D:\\Dependencies\\opencv\\opencv\\build\\x64\\vc16\\lib")
-=======
-    find_package(OpenCV REQUIRED PATHS "D:/Dependencies/opencv/opencv/build/x64/vc16/lib")
->>>>>>> 3b198cf0ad4132594f2112c5631ec7e998c0d0aa
     include_directories(${OpenCV_INCLUDE_DIRS})
 
     add_executable(detect-image-demo ${fdt_base_dir}/example/detect-image.cpp)
