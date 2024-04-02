@@ -1,3 +1,7 @@
+2024.4.2
+昨晚用add_subdirectory解决了这个问题，但没有把我加的cuda_model放进去，install这里一直报错，
+暂时注释掉，后面再添加install就行
+
 2024.4.1
 为什么这样就可以被正确设置
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)

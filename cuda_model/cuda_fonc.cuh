@@ -1,1 +1,1 @@
-extern void product();
+void product();
