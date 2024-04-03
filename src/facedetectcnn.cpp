@@ -144,7 +144,6 @@ inline float dotProduct(const float * p1, const float * p2, int num)
     }
    sum = _mm512_reduce_add_ps(sum_float_x16);
 #elif defined(_ENABLE_CUDA)
-    cuda_dotProduct();
     for(int i = 0; i < num; i++)
     {
         sum += (p1[i] * p2[i]);

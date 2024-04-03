@@ -133,7 +133,7 @@ include(GNUInstallDirs)
 # Create a library
 ADD_LIBRARY(${fdt_lib_name} ${fdt_source_files} ${INSTALLHEADER_FILES})
 if(ENABLE_CUDA)
-    target_link_libraries(facedetection PRIVATE cuda_lib)
+    target_link_libraries(facedetection PUBLIC cuda_lib)
 endif()
 
 # Generate export header
@@ -175,7 +175,7 @@ install(FILES "${CMAKE_BINARY_DIR}/${fdt_lib_name}ConfigVersion.cmake" DESTINATI
 ]]#
 # Create demo. OpenCV is requred.
 if (DEMO)
-    find_package(OpenCV REQUIRED PATHS "D:\\Dependencies\\opencv\\opencv\\build\\x64\\vc16\\lib")
+    find_package(OpenCV REQUIRED PATHS "D:\\Dependencies\\opencv\\opencv\\build")
     include_directories(${OpenCV_INCLUDE_DIRS})
 
     add_executable(detect-image-demo ${fdt_base_dir}/example/detect-image.cpp)
