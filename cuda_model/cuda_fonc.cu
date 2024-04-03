@@ -5,9 +5,9 @@
 #include<stdio.h>
 
 __global__ void sub_dotproduct(){
-    printf("hello cuda!");
+    
 }
 
-void product(){
-    sub_dotproduct<<<1, 1>>>();
+void cuda_dotProduct(){
+    
 }

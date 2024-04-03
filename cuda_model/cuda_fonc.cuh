@@ -1,1 +1,1 @@
-void product();
+void cuda_dotProduct();

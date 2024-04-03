@@ -1,6 +1,7 @@
 2024.4.2
 昨晚用add_subdirectory解决了这个问题，但没有把我加的cuda_model放进去，install这里一直报错，
 暂时注释掉，后面再添加install就行
+emm，今天早上就摸鱼了，难得解决了一个大问题，找找cuda教程吧
 
 2024.4.1
 为什么这样就可以被正确设置
@@ -13,7 +14,6 @@ endif()
 A single input file is required for a non-link phase when an output file is specified的错误
 重置了一次，这次试试模块化，这次以防万一，，，
 
-大概需要，cmake的model怎么用
 
 2024.3.30
 
