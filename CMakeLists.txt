@@ -57,15 +57,6 @@ SET(fdt_inc_dir    ${fdt_base_dir}/src)
 
 SET(fdt_lib_name   facedetection)
 
-if(ENABLE_CUDA)
-    enable_language(CUDA)
-    if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-    set(CMAKE_CUDA_ARCHITECTURES 86)
-    endif()
-    add_subdirectory(cuda_model)
-
-    
-endif()
 
 FILE(GLOB_RECURSE fdt_source_files 
     ${fdt_src_dir}/facedetectcnn-data.cpp
@@ -99,6 +90,7 @@ ENDIF()
 
 if(ENABLE_CUDA)
     add_definitions(-D_ENABLE_CUDA)
+    find_package(CUDAToolkit REQUIRED)
 endif()
 
 if(ENABLE_AVX512)
@@ -133,8 +125,8 @@ include(GNUInstallDirs)
 # Create a library
 ADD_LIBRARY(${fdt_lib_name} ${fdt_source_files} ${INSTALLHEADER_FILES})
 if(ENABLE_CUDA)
-    target_link_libraries(facedetection PUBLIC cuda_lib)
-endif()
+    target_link_libraries(${fdt_lib_name} PUBLIC CUDA::cublas CUDA::cudart)
+endif(ENABLE_CUDA)
 
 # Generate export header
 GENERATE_EXPORT_HEADER(${fdt_lib_name})
@@ -172,17 +164,18 @@ write_basic_package_version_file(
     VERSION ${BUILD_VERSION}
     COMPATIBILITY AnyNewerVersion)
 install(FILES "${CMAKE_BINARY_DIR}/${fdt_lib_name}ConfigVersion.cmake" DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${fdt_lib_name}")
-]]#
+#]]
 # Create demo. OpenCV is requred.
 if (DEMO)
     find_package(OpenCV REQUIRED PATHS "D:\\Dependencies\\opencv\\opencv\\build")
+    
     include_directories(${OpenCV_INCLUDE_DIRS})
 
     add_executable(detect-image-demo ${fdt_base_dir}/example/detect-image.cpp)
-    target_link_libraries(detect-image-demo ${fdt_lib_name} ${OpenCV_LIBS})
+    target_link_libraries(detect-image-demo ${fdt_lib_name} ${OpenCV_LIBS} )
 
     add_executable(detect-camera-demo ${fdt_base_dir}/example/detect-camera.cpp)
-    target_link_libraries(detect-camera-demo ${fdt_lib_name} ${OpenCV_LIBS})
+    target_link_libraries(detect-camera-demo ${fdt_lib_name} ${OpenCV_LIBS} )
     
     add_executable(benchmark ${fdt_base_dir}/example/benchmark.cpp)
     target_link_libraries(benchmark ${fdt_lib_name} ${OpenCV_LIBS})

@@ -1,1 +1,0 @@
-void cuda_dotProduct(const float* p1, const float* p2, float& sum, int num);
