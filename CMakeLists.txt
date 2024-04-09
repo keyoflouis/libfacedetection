@@ -9,7 +9,7 @@ option(ENABLE_NEON "whether use neon, if use arm please set it on" OFF)
 option(ENABLE_AVX512 "use avx512" OFF)
 option(ENABLE_AVX2 "use avx2" OFF)
 option(DEMO "build the demo" ON)
-option(USE_OPENMP "Use OpenMP" ON)
+option(USE_OPENMP "Use OpenMP" OFF)
 
 if (BUILD_SHARED_LIBS)
 	add_definitions(-DBUILD_SHARED_LIBS)
@@ -76,7 +76,7 @@ LIST(SORT         fdt_source_files)
 
 SET(INSTALLHEADER_FILES ${fdt_inc_dir}/facedetectcnn.h)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 

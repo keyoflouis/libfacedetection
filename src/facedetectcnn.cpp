@@ -127,6 +127,8 @@ CDataBlob<float> setDataFrom3x3S2P1to1x1S1P0FromImage(const unsigned char* input
     } 
     return outBlob;
 }
+static inline size_t counter = 0;
+static inline DotProductGPU dotProductGPU{ 32 };
 
 //p1 and p2 must be 512-bit aligned (16 float numbers)
 inline float dotProduct(const float * p1, const float * p2, int num)
@@ -144,7 +146,11 @@ inline float dotProduct(const float * p1, const float * p2, int num)
     }
    sum = _mm512_reduce_add_ps(sum_float_x16);
 #elif defined(_ENABLE_CUDA)
-    cuda_dotProduct(p1, p2, sum, num);
+    //cuda_dotProduct(p1, p2, sum, num);
+    //dotProductGPU(sum, p1, p2, num);
+
+    dotProductGPU(sum, p1, p2);
+
 #elif defined(_ENABLE_AVX2)
     __m256 a_float_x8, b_float_x8;
     __m256 sum_float_x8 = _mm256_setzero_ps();
@@ -177,7 +183,6 @@ inline float dotProduct(const float * p1, const float * p2, int num)
         sum += (p1[i] * p2[i]);
     }
 #endif
-
     return sum;
 }
 

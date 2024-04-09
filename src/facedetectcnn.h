@@ -137,7 +137,6 @@ public:
 	int channels; //in element
     int channelStep; //in byte
     T * data;
-
 public:
 	CDataBlob() {
 		rows = 0;
