@@ -38,6 +38,9 @@ the use of this software, even if advised of the possibility of such damage.
 
 #ifdef _ENABLE_CUDA
 #include "../cuda_model/cuda_fonc.cuh"
+#include"cuda.h"
+#include"cuda_runtime.h"
+#include "device_launch_parameters.h"
 #endif
 
 #include "facedetectcnn.h"
@@ -300,12 +303,15 @@ inline bool vecAdd(const float *p1, const float *p2, float *p3, int num)
     return true;
 }
 #ifdef _ENABLE_CUDA
+
+
 bool convolution_1x1pointwise(const CDataBlob<float> &inputData, const Filters<float> &filters, CDataBlob<float> &outputData)
 {
+    
     for (int row = 0; row < outputData.rows; row++)
     {
         for (int col = 0; col < outputData.cols; col++)
-        {
+        { 
             float *pOut = outputData.ptr(row, col); 
             const float *pIn = inputData.ptr(row, col);
             for (int ch = 0; ch < outputData.channels; ch++)            
@@ -322,6 +328,11 @@ bool convolution_1x1pointwise(const CDataBlob<float> &inputData, const Filters<f
         }
     }
     return true;
+    /*
+        int idx = cols * rows +cols;
+        int cudaIdx =blockIdx.x*blockDim.x +threadIdx.x;
+
+    */
 }
 #else
 bool convolution_1x1pointwise(const CDataBlob<float> &inputData, const Filters<float> &filters, CDataBlob<float> &outputData)
