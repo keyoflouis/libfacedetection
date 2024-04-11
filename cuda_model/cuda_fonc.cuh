@@ -33,10 +33,12 @@ public:
 		this->cols = _cols;
 		this->channels = _channels;
 		this->channelStep = _channelStep;
-
 		size_t size_bytes = size_t(rows) * cols * channelStep;
 
+		this->data =(float*) malloc(size_bytes);
 		std::memcpy(this->data, _data, size_bytes);
+
+		printf("hllo");
 
 		if (data == nullptr)
 		{
@@ -49,6 +51,21 @@ public:
 
 	~CDataBlobKernel()
 	{
+	}
+
+	inline float *ptr(int r, int c)
+	{
+		if (r < 0 || r >= this->rows || c < 0 || c >= this->cols)
+			return nullptr;
+
+		return (this->data + (size_t(r) * this->cols + c) * this->channelStep / sizeof(float));
+	}
+	inline const float *ptr(int r, int c) const
+	{
+		if (r < 0 || r >= this->rows || c < 0 || c >= this->cols)
+			return nullptr;
+
+		return (this->data + (size_t(r) * this->cols + c) * this->channelStep / sizeof(float));
 	}
 };
 
@@ -64,7 +81,6 @@ public:
 	CDataBlobKernel weights;
 	CDataBlobKernel biases;
 
-private:
 	FiltersKernel()
 	{
 		channels = 0;
@@ -102,12 +118,11 @@ private:
 	}
 };
 
-bool convolution_1x1pointwiseKernel(int input_rows, 
-									int input_cols, 
-									int input_channels, 
-									int input_channelStep, 
+CDataBlobKernel* convolution_1x1pointwiseKernel(int input_rows,
+									int input_cols,
+									int input_channels,
+									int input_channelStep,
 									float *input_data,
-
 
 									int channels,
 									int num_filters,
@@ -125,11 +140,10 @@ bool convolution_1x1pointwiseKernel(int input_rows,
 									int biases_cols,
 									int biases_channels,
 									int biases_channelStep,
-									float *biases_data, 
-									
-									
-									int output_rows, 
-									int output_cols, 
-									int output_channels, 
-									int output_channelStep, 
+									float *biases_data,
+
+									int output_rows,
+									int output_cols,
+									int output_channels,
+									int output_channelStep,
 									float *output_data);

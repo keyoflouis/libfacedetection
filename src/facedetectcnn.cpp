@@ -307,7 +307,7 @@ inline bool vecAdd(const float *p1, const float *p2, float *p3, int num)
 
 bool convolution_1x1pointwise(const CDataBlob<float> &inputData, const Filters<float> &filters, CDataBlob<float> &outputData)
 {
-    convolution_1x1pointwiseKernel(inputData.rows,
+    CDataBlobKernel* out =convolution_1x1pointwiseKernel(inputData.rows,
         inputData.cols,
         inputData.channels,
         inputData.channelStep,
@@ -338,25 +338,16 @@ bool convolution_1x1pointwise(const CDataBlob<float> &inputData, const Filters<f
         outputData.channels,
         outputData.channelStep,
         outputData.data);
-    for (int row = 0; row < outputData.rows; row++)
-    {
-        for (int col = 0; col < outputData.cols; col++)
-        { 
-            float *pOut = outputData.ptr(row, col); 
-            const float *pIn = inputData.ptr(row, col);
-            for (int ch = 0; ch < outputData.channels; ch++)            
-            {
-                const float *pF = filters.weights.ptr(0, ch);
-                float sum = 0.f;
-                for (int i = 0; i < inputData.channels; i++)
-                {
-                    sum += (pIn[i] * pF[i]);
-                }
-                pOut[ch] = sum;
-                pOut[ch] += filters.biases.data[ch];
-            }
-        }
-    }
+
+    outputData.rows = out->rows;
+    outputData.cols = out->cols;
+    outputData.channels = out->channels;
+    outputData.channelStep = out->channelStep;
+
+    size_t size_bytes = size_t(out->rows) * out->cols * out->channelStep;
+
+    std::memcpy(outputData.data,out->data,size_bytes);
+
     return true;
     /*
         int idx = cols * rows +cols;
