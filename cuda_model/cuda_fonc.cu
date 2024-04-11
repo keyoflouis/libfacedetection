@@ -12,7 +12,7 @@ CDataBlobKernel* convolution_1x1pointwiseKernel(int input_rows,
                                     int input_channelStep,
                                     float *input_data,
 
-                                    int t_channels,
+                                    int channels,
                                     int num_filters,
                                     bool is_depthwise,
                                     bool is_pointwise,
@@ -38,7 +38,7 @@ CDataBlobKernel* convolution_1x1pointwiseKernel(int input_rows,
 {
     CDataBlobKernel inputData(input_rows, input_cols, input_channels, input_channelStep, input_data);
     CDataBlobKernel outputData(output_rows, output_cols, output_channels, output_channelStep, output_data);
-    FiltersKernel filters(t_channels, num_filters, is_depthwise, is_pointwise, with_relu,
+    FiltersKernel filters(channels, num_filters, is_depthwise, is_pointwise, with_relu,
 
                           weights_rows, weights_cols, weights_channels, weights_channelStep, weight_data,
 
