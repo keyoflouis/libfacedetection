@@ -307,7 +307,37 @@ inline bool vecAdd(const float *p1, const float *p2, float *p3, int num)
 
 bool convolution_1x1pointwise(const CDataBlob<float> &inputData, const Filters<float> &filters, CDataBlob<float> &outputData)
 {
-    
+    convolution_1x1pointwiseKernel(inputData.rows,
+        inputData.cols,
+        inputData.channels,
+        inputData.channelStep,
+        inputData.data,
+
+
+        filters.channels,
+        filters.num_filters,
+        filters.is_depthwise,
+        filters.is_pointwise,
+        filters.with_relu,
+
+        filters.weights.rows,
+        filters.weights.cols,
+        filters.weights.channels,
+        filters.weights.channelStep,
+        filters.weights.data,
+
+        filters.biases.rows,
+        filters.biases.cols,
+        filters.biases.channels,
+        filters.biases.channelStep,
+        filters.biases.data,
+
+
+        outputData.rows,
+        outputData.cols,
+        outputData.channels,
+        outputData.channelStep,
+        outputData.data);
     for (int row = 0; row < outputData.rows; row++)
     {
         for (int col = 0; col < outputData.cols; col++)

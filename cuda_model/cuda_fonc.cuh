@@ -1,5 +1,5 @@
 #include <iostream>
-#include <stdlib.h>
+#include <cstring>
 
 class CDataBlobKernel
 {
@@ -27,23 +27,23 @@ public:
 		data = nullptr;
 	}
 
-	CDataBlobKernel(int rows, int cols, int channels, int channelStep, float *data)
+	CDataBlobKernel(int _rows, int _cols, int _channels, int _channelStep, float *_data)
 	{
-		this->rows = rows;
-		this->cols = cols;
-		this->channels = channels;
-		this->channelStep = channelStep;
+		this->rows = _rows;
+		this->cols = _cols;
+		this->channels = _channels;
+		this->channelStep = _channelStep;
 
 		size_t size_bytes = size_t(rows) * cols * channelStep;
 
-		memcpy(this->data, data, size_bytes);
+		std::memcpy(this->data, _data, size_bytes);
 
 		if (data == nullptr)
 		{
 			std::cerr << "CDataBlobKernel Failed to alloc memeory for uint8 data blob: "
-					  << rows << "*"
-					  << cols << "*"
-					  << channels << std::endl;
+					  << _rows << "*"
+					  << _cols << "*"
+					  << _channels << std::endl;
 		}
 	}
 
@@ -97,7 +97,39 @@ private:
 		this->is_pointwise = is_pointwise;
 		this->with_relu = with_relu;
 
-		weights = CDataBlobKernel(weights_rows,weights_cols, weights_channels, weights_channelStep, weight_data);
-		biases = CDataBlobKernel(biases_rows,biases_cols, biases_channels, biases_channelStep, biases_data);
+		weights = CDataBlobKernel(weights_rows, weights_cols, weights_channels, weights_channelStep, weight_data);
+		biases = CDataBlobKernel(biases_rows, biases_cols, biases_channels, biases_channelStep, biases_data);
 	}
 };
+
+bool convolution_1x1pointwiseKernel(int input_rows, 
+									int input_cols, 
+									int input_channels, 
+									int input_channelStep, 
+									float *input_data,
+
+
+									int channels,
+									int num_filters,
+									bool is_depthwise,
+									bool is_pointwise,
+									bool with_relu,
+
+									int weights_rows,
+									int weights_cols,
+									int weights_channels,
+									int weights_channelStep,
+									float *weight_data,
+
+									int biases_rows,
+									int biases_cols,
+									int biases_channels,
+									int biases_channelStep,
+									float *biases_data, 
+									
+									
+									int output_rows, 
+									int output_cols, 
+									int output_channels, 
+									int output_channelStep, 
+									float *output_data);
