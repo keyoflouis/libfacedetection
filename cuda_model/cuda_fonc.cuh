@@ -10,13 +10,6 @@ public:
 	int channelStep; // in byte
 	float *data;
 
-private:
-	int *p_rows = &rows;
-	int *p_cols = &cols;
-	int *p_channels = &channels;
-	int *p_channelStep = &channelStep;
-	float **p_data = &data;
-
 public:
 	CDataBlobKernel()
 	{
@@ -37,8 +30,6 @@ public:
 
 		this->data =(float*) malloc(size_bytes);
 		std::memcpy(this->data, _data, size_bytes);
-
-		printf("hllo");
 
 		if (data == nullptr)
 		{
