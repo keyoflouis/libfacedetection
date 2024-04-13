@@ -1,3 +1,49 @@
+
+2024.4.12
+终于把数据扔gpu上了，这里出了问题，通过gpt4写的代码看懂的
+  /*
+   cudaMalloc((void**)&d_obj, sizeof(CDataBlobKernel));
+   cudaMalloc((void**)&d_p, 128 * sizeof(float));
+   // cudaMalloc和cudaMemcpy都是在对 &d_obj 指向的内存进行操作，
+   // 也就是说cudaMallo和cudaMemcpy都是在对 d_obj 这个指针变量赋值
+   // 
+   // 这里表示 d_p 的值指向gpu内存的一个128大小的浮点数数组的首地址。
+   // 因此 &d_p 依然是一个cpu内存的地址，d_p 的值指向gpu内存的一个128大小的浮点数数组的首地址。
+   
+   // 同理，&d_obj 表示 cpu 内存上的地址， d_obj表示gpu内存上这个对象的首地址。
+
+
+
+   // 把数据从CPU内存复制到GPU内存
+   //cudaMemcpy(d_p, obj.p, 128 * sizeof(float), cudaMemcpyHostToDevice);
+   //cudaMemcpy(&(d_obj->p), &d_p, sizeof(float*), cudaMemcpyHostToDevice);
+
+
+   // 为什么要用上面的代码而不用下面这个，
+   // 猜测？
+   // obj.p 是一个主机指针，而 d_obj->p 是一个设备指针
+   // 上面的代码是复制的地址的值，下面这个是复制的内存的大小。
+   // 也许是d_obj->p分配了大小但没有调用构造函数初始化，导致不知道p这个指针的值是指向什么地方
+   // 而上面d_obj->p分配了大小，虽然也没有用构造函数初始化，但由于是对p赋值，因此可以成功。
+   cudaMemcpy(d_obj->p, obj.p, 128* sizeof(float), cudaMemcpyHostToDevice);
+   */
+2024.4.11
+直接接入CDataBlob会重定义，只能把数据结构拆掉扔cuda来组装，
+类里面不能直接定义一个gpu的函数，但是可以通过友元函数来实现类似于封装的效果，
+数据的传输总算是有了个确切的解决方案。。。。
+
+2024.4.10
+要把CDataBlob引入cuda，，，，不太可能加个头文件就行，只能自己拓展一个一模一样的数据结构在cuda上运行了，相似就行，不用完全一样，
+也可以引入这个CDataBlob，这样可以减少复杂度。
+
+2024.4.9
+本来想通过直接操作，CDataBlob的Data指针指向的内存来点积，做起来有点太过复杂了，加了中文注释，乱码了，就很头大，明天重做吧
+
+2024.4.8
+请别人帮我看了看，最主要的问题就是cpu和gpu的数据传输过多，负优化了，只能改整个卷积函数
+出在kernel的函数太复杂，而调用cublas库的版本单纯的调用错了
+
+
 2024.4.7
 今天把cuda模块写好，分析性能就行。代码是加上去了，看起来没有问题，，但运行不出结果
 
