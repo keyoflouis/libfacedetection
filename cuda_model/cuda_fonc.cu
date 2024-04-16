@@ -5,6 +5,11 @@
 #include <stdio.h>
 
 #define thread_per_block 256
+__global__ void kernel(CDataBlobKernel* inputData, CDataBlobKernel* outputData, FiltersKernel* filters) {
+	
+	printf("inputData : %d , %d ,%d ,%d,%d \n", inputData->channels, inputData->channelStep, inputData->cols, inputData->data,inputData->rows);
+	printf("outputData : %d , %d ,%d ,%d,%d \n", outputData->channels, outputData->channelStep, outputData->cols, outputData->data, outputData->rows);
+}
 
 CDataBlobKernel *convolution_1x1pointwiseKernel(int input_rows,
                                                 int input_cols,
@@ -43,30 +48,36 @@ CDataBlobKernel *convolution_1x1pointwiseKernel(int input_rows,
                       		biases_rows, biases_cols, biases_channels, biases_channelStep, biases_data);
 
 
-
+	
 	
 	CDataBlobKernel* dev_inputData;
 	CDataBlobKernel* dev_outputData;
 	FiltersKernel* dev_filters;
 
 
-	cudaMallocManaged((void**)&dev_inputData,sizeof(CDataBlobKernel));
-	cudaMallocManaged((void**)&dev_outputData,sizeof(CDataBlobKernel));
-	cudaMallocManaged((void**)&dev_filters,sizeof(FiltersKernel));
+	cudaMalloc((void**)&dev_inputData,sizeof(CDataBlobKernel));
+	cudaMalloc((void**)&dev_outputData,sizeof(CDataBlobKernel));
+	cudaMalloc((void**)&dev_filters,sizeof(FiltersKernel));
 	
 	
 	float* dev_input_data;
 	float* dev_output_data;
 
-	// allocate and deep copy for inpute
+	// allocate copy and deep copy for inpute
  	size_t size_bytes_devInputData = size_t(inputData.rows) * inputData.cols * inputData.channelStep;
-	cudaMallocManaged((void**)&dev_input_data, size_bytes_devInputData);
+	cudaMemcpy(dev_inputData,&inputData,sizeof(CDataBlobKernel),cudaMemcpyHostToDevice);
+
+
+	// deep copy for inpute
+	cudaMalloc((void**)&dev_input_data, size_bytes_devInputData);
 	cudaMemcpy(dev_input_data ,inputData.data, size_bytes_devInputData,cudaMemcpyHostToDevice);
 	cudaMemcpy( &dev_inputData->data , &dev_input_data , sizeof(float*) , cudaMemcpyHostToDevice );
 
-	// allocate and deep copy for outpute
+	// allocate copy and deep copy for outpute
 	size_t size_bytes_devOutputData = size_t(outputData.rows) * outputData.cols * outputData.channelStep;
-	cudaMallocManaged((void**)&dev_output_data , size_bytes_devOutputData );
+	cudaMemcpy(dev_outputData, &outputData, sizeof(CDataBlobKernel), cudaMemcpyHostToDevice);
+
+	cudaMalloc((void**)&dev_output_data , size_bytes_devOutputData );
 	cudaMemcpy(dev_output_data, outputData.data, size_bytes_devOutputData, cudaMemcpyHostToDevice);
 	cudaMemcpy( &dev_outputData->data , &dev_output_data , sizeof(float*) , cudaMemcpyHostToDevice );
 
@@ -75,12 +86,14 @@ CDataBlobKernel *convolution_1x1pointwiseKernel(int input_rows,
 	// allocate and deep copy for filters
 	float* dev_filters_weightsData;
 	float* dev_filters_biasesData;
-	
+	cudaMemcpy(dev_filters, &filters,sizeof(FiltersKernel),cudaMemcpyHostToDevice);
+
+
 	size_t size_bytes_devfilters_weightsData = size_t(filters.weights.rows) * filters.weights.cols * filters.weights.channelStep;
 	size_t size_bytes_devfilters_biasesData = size_t(filters.biases.rows) * filters.biases.cols * filters.biases.channelStep;
 
-	cudaMallocManaged((void**)&dev_filters_weightsData,size_bytes_devfilters_weightsData);
-	cudaMallocManaged((void**)&dev_filters_biasesData,size_bytes_devfilters_biasesData);
+	cudaMalloc((void**)&dev_filters_weightsData,size_bytes_devfilters_weightsData);
+	cudaMalloc((void**)&dev_filters_biasesData,size_bytes_devfilters_biasesData);
 	
 	cudaMemcpy(dev_filters_weightsData ,  filters.weights.data , size_bytes_devfilters_weightsData ,cudaMemcpyHostToDevice);
 	cudaMemcpy(&dev_filters->weights.data,&dev_filters_weightsData, size_bytes_devfilters_weightsData,cudaMemcpyHostToDevice);
@@ -89,28 +102,27 @@ CDataBlobKernel *convolution_1x1pointwiseKernel(int input_rows,
 	cudaMemcpy(&dev_filters->biases.data,&dev_filters_biasesData, size_bytes_devfilters_biasesData,cudaMemcpyHostToDevice);
 
 	// invoke	
-
+	kernel << <1, 1 >> > (dev_inputData,dev_outputData,dev_filters);
 
 	// store the results
+	void* temp = outputData.data;
 	cudaMemcpy(&outputData , dev_outputData,sizeof(CDataBlobKernel),cudaMemcpyDeviceToHost);
-	cudaMemcpy(&outputData.data , &dev_outputData->data,size_bytes_devOutputData ,cudaMemcpyDeviceToHost);
+	outputData.data = (float*)temp;
+	cudaMemcpy(outputData.data, dev_output_data, size_bytes_devOutputData, cudaMemcpyDeviceToHost);
+
 
 	// free
 	
 	cudaFree(dev_input_data);
-	cudaFree(dev_inputData->data);
 	cudaFree(dev_inputData);
 
 	cudaFree(dev_output_data);
-	cudaFree(dev_outputData->data);
 	cudaFree(dev_outputData);
 
 	cudaFree(dev_filters_weightsData);
 	cudaFree(dev_filters_biasesData);
-	cudaFree(dev_filters->biases.data);
-	cudaFree(dev_filters->weights.data);
 	cudaFree(dev_filters);
-
+	
     for (int row = 0; row < outputData.rows; row++)
     {
         for (int col = 0; col < outputData.cols; col++)

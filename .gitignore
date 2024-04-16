@@ -193,3 +193,6 @@ android/gradlew
 **/__pycache__
 .vscode
 cuda_log.txt
+
+build-cuda/
+build-cpu/
