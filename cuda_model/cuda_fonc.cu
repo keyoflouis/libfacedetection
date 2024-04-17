@@ -96,10 +96,10 @@ CDataBlobKernel *convolution_1x1pointwiseKernel(int input_rows,
 	cudaMalloc((void**)&dev_filters_biasesData,size_bytes_devfilters_biasesData);
 	
 	cudaMemcpy(dev_filters_weightsData ,  filters.weights.data , size_bytes_devfilters_weightsData ,cudaMemcpyHostToDevice);
-	cudaMemcpy(&dev_filters->weights.data,&dev_filters_weightsData, size_bytes_devfilters_weightsData,cudaMemcpyHostToDevice);
+	cudaMemcpy(&dev_filters->weights.data,&dev_filters_weightsData, sizeof(float*),cudaMemcpyHostToDevice);
 	
 	cudaMemcpy(dev_filters_biasesData ,  filters.biases.data , size_bytes_devfilters_biasesData ,cudaMemcpyHostToDevice);
-	cudaMemcpy(&dev_filters->biases.data,&dev_filters_biasesData, size_bytes_devfilters_biasesData,cudaMemcpyHostToDevice);
+	cudaMemcpy(&dev_filters->biases.data,&dev_filters_biasesData, sizeof(float*),cudaMemcpyHostToDevice);
 
 	// invoke	
 	kernel << <1, 1 >> > (dev_inputData,dev_outputData,dev_filters);
