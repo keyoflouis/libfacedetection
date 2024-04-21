@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cstring>
-
+#include "cuda.h"
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
 class CDataBlobKernel
 {
 public:
@@ -20,7 +22,7 @@ public:
 		data = nullptr;
 	}
 
-	CDataBlobKernel(int _rows, int _cols, int _channels, int _channelStep, float *_data)
+	__host__ CDataBlobKernel(int _rows, int _cols, int _channels, int _channelStep, float *_data)
 	{
 		this->rows = _rows;
 		this->cols = _cols;
@@ -44,14 +46,14 @@ public:
 	{
 	}
 
-	inline float *ptr(int r, int c)
+	__host__ __device__ inline float *ptr(int r, int c)
 	{
 		if (r < 0 || r >= this->rows || c < 0 || c >= this->cols)
 			return nullptr;
 
 		return (this->data + (size_t(r) * this->cols + c) * this->channelStep / sizeof(float));
 	}
-	inline const float *ptr(int r, int c) const
+	__host__ __device__ inline const float *ptr(int r, int c) const
 	{
 		if (r < 0 || r >= this->rows || c < 0 || c >= this->cols)
 			return nullptr;
