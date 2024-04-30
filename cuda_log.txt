@@ -1,4 +1,11 @@
 
+2024.4.29
+准备最后的优化了
+
+
+2024.4.27
+封装了一下cuda
+
 2024.4.17
 blcokIdx.x     表示该block在grid中的 dimensionx
 blcokIdx.y     表示该block在grid中的 dimensiony

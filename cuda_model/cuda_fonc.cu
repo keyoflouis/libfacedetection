@@ -1,28 +1,15 @@
 #include "cuda_fonc.cuh"
+#ifndef CUDA_HEADER
+#define CUDA_HEADER	
+
+#include "cuda.h"
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
+#endif 
 
 #include <stdio.h>
 
-#define thread_per_block 256
 __global__ void kernel(CDataBlobKernel* inputData, CDataBlobKernel* outputData, FiltersKernel* filters) {
-	
-	//size_t size_bytes_devfilters_weightsData = size_t(filters->weights.rows) * filters->weights.cols * filters->weights.channelStep;
-	//for (int i = 0; i < size_bytes_devfilters_weightsData /4; i++) {
-	//	printf("%f \n", filters->weights.data[i]);
-	//}
-
-	/*size_t size_bytes_devInputData = size_t(inputData->rows) * inputData->cols * inputData->channelStep;
-	for (int i = 0; i < size_bytes_devInputData;i++) {
-		printf("%f \n", inputData->data[i]);
-	}*/
-
-	/*size_t size_bytes_devOutputData = size_t(outputData->rows) * outputData->cols * outputData->channelStep;
-	for (int i = 0; i < size_bytes_devOutputData;i++) {
-		printf("%f \n", outputData->data[i]);
-	}*/
-
-	/*atomicAdd(&outputData->data[1], 1.0f);*/
-	/*outputData->data[1] = 1.0f;
-	printf("%f", outputData->data[1]);*/
 	
 	int row = blockDim.x * blockIdx.x + threadIdx.x;
 	int col = blockDim.y * blockIdx.y + threadIdx.y;
@@ -42,39 +29,9 @@ __global__ void kernel(CDataBlobKernel* inputData, CDataBlobKernel* outputData, 
 					{
 						sum += (pIn[i] * pF[i]);
 					}
-					pOut[ch] = sum;
-					pOut[ch] += filters->biases.data[ch];
-					/*if (!(ch % 100))
-						printf("%f \n", pOut[ch]);*/
-				}
-					
+					pOut[ch] = (sum + filters->biases.data[ch]);
+				}		
 			}
-			
-	
-	  //for (int row = 0; row < outputData->rows; row++)
-   // {
-   //     for (int col = 0; col < outputData->cols; col++)
-   //     {
-   //         float *pOut = outputData->ptr(row, col);
-   //         const float *pIn = inputData->ptr(row, col);
-
-   //         for (int ch = 0; ch < outputData->channels; ch++)
-   //         {
-   //             const float *pF = filters->weights.ptr(0, ch);
-   //             float sum = 0.f;
-   //             for (int i = 0; i < inputData->channels; i++)
-   //             {
-   //                 sum += (pIn[i] * pF[i]);
-   //             }
-   //             pOut[ch] = sum;
-   //             pOut[ch] += filters->biases.data[ch];
-			//		
-			//	//if (!(ch % 100))
-			//	//	printf("%f \n", pOut[ch]);
-
-   //         }
-   //     }
-   // }
 }
 
 CDataBlobKernel *convolution_1x1pointwiseKernel(int input_rows,
@@ -116,43 +73,13 @@ CDataBlobKernel *convolution_1x1pointwiseKernel(int input_rows,
 
 	
 	
-	CDataBlobKernel* dev_inputData;
-	CDataBlobKernel* dev_outputData;
+	oopBlobToKernel input(inputData);
+	oopBlobToKernel output(outputData);
+
+
 	FiltersKernel* dev_filters;
-
-
-	cudaMalloc((void**)&dev_inputData,sizeof(CDataBlobKernel));
-	cudaMalloc((void**)&dev_outputData,sizeof(CDataBlobKernel));
 	cudaMalloc((void**)&dev_filters,sizeof(FiltersKernel));
-	
-	
-	float* dev_input_data;
-	float* dev_output_data;
 
-	// allocate copy and deep copy for inpute
- 	size_t size_bytes_devInputData = size_t(inputData.rows) * inputData.cols * inputData.channelStep;
-	cudaMemcpy(dev_inputData,&inputData,sizeof(CDataBlobKernel),cudaMemcpyHostToDevice);
-
-
-	// deep copy for inpute
-	cudaMalloc((void**)&dev_input_data, size_bytes_devInputData);
-	cudaMemcpy(dev_input_data ,inputData.data, size_bytes_devInputData,cudaMemcpyHostToDevice);
-	cudaMemcpy( &dev_inputData->data , &dev_input_data , sizeof(float*) , cudaMemcpyHostToDevice );
-
-	// allocate copy and deep copy for outpute
-	size_t size_bytes_devOutputData = size_t(outputData.rows) * outputData.cols * outputData.channelStep;
-	cudaMemcpy(dev_outputData, &outputData, sizeof(CDataBlobKernel), cudaMemcpyHostToDevice);
-
-	cudaMalloc((void**)&dev_output_data , size_bytes_devOutputData );
-	cudaMemcpy(dev_output_data, outputData.data, size_bytes_devOutputData, cudaMemcpyHostToDevice);
-	cudaMemcpy( &dev_outputData->data , &dev_output_data , sizeof(float*) , cudaMemcpyHostToDevice );
-
-
-	/*for (int i = 0; i < size_bytes_devInputData / 4; i++) {
-		printf("cpu :%d", inputData.data[i]);
-	}*/
-
-	
 	// allocate and deep copy for filters
 	float* dev_filters_weightsData;
 	float* dev_filters_biasesData;
@@ -181,49 +108,22 @@ CDataBlobKernel *convolution_1x1pointwiseKernel(int input_rows,
 	dim3 dimBlock(blockSize, blockSize);
 	dim3 dimGrid(gridCols, gridRows); 
 
-	kernel << <dimGrid, dimBlock >> > (dev_inputData, dev_outputData, dev_filters);
+	kernel << <dimGrid, dimBlock >> > (input.devCDataBlob, output.devCDataBlob, dev_filters);
 
 	cudaDeviceSynchronize();
+
 	// store the results
 	void* temp = outputData.data;
-	cudaMemcpy(&outputData , dev_outputData,sizeof(CDataBlobKernel),cudaMemcpyDeviceToHost);
+	cudaMemcpy(&outputData , output.devCDataBlob,sizeof(CDataBlobKernel),cudaMemcpyDeviceToHost);
 	outputData.data = (float*)temp;
-	cudaMemcpy(outputData.data, dev_output_data, size_bytes_devOutputData, cudaMemcpyDeviceToHost);
+	cudaMemcpy(outputData.data, output.devdata, output.size_inbytes_Data, cudaMemcpyDeviceToHost);
 
 
 	// free
-	
-	cudaFree(dev_input_data);
-	cudaFree(dev_inputData);
-
-	cudaFree(dev_output_data);
-	cudaFree(dev_outputData);
 
 	cudaFree(dev_filters_weightsData);
 	cudaFree(dev_filters_biasesData);
 	cudaFree(dev_filters);
-	
-	//printf("%f", outputData.data[1]);
 
-  //for (int row = 0; row < outputData.rows; row++)
-  //  {
-  //      for (int col = 0; col < outputData.cols; col++)
-  //      {
-  //          float *pOut = outputData.ptr(row, col);
-  //          const float *pIn = inputData.ptr(row, col);
-
-  //          for (int ch = 0; ch < outputData.channels; ch++)
-  //          {
-  //              const float *pF = filters.weights.ptr(0, ch);
-  //              float sum = 0.f;
-  //              for (int i = 0; i < inputData.channels; i++)
-  //              {
-  //                  sum += (pIn[i] * pF[i]);
-  //              }
-  //              pOut[ch] = sum;
-  //              pOut[ch] += filters.biases.data[ch];
-  //          }
-  //      }
-  //  }
     return &outputData;
 };

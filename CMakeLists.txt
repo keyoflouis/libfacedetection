@@ -63,7 +63,6 @@ if(ENABLE_CUDA)
     set(CMAKE_CUDA_ARCHITECTURES 86)
     endif()
     add_subdirectory(cuda_model)
-
     
 endif()
 
@@ -175,7 +174,7 @@ install(FILES "${CMAKE_BINARY_DIR}/${fdt_lib_name}ConfigVersion.cmake" DESTINATI
 ]]#
 # Create demo. OpenCV is requred.
 if (DEMO)
-    find_package(OpenCV REQUIRED PATHS "D:\\Dependencies\\opencv\\build")
+    find_package(OpenCV REQUIRED PATHS "D:\\Dependencies\\opencv\\build\\x64\\vc16\\lib")
     include_directories(${OpenCV_INCLUDE_DIRS})
 
     add_executable(detect-image-demo ${fdt_base_dir}/example/detect-image.cpp)
@@ -189,7 +188,7 @@ if (DEMO)
 endif()
 
 if (GSTREAMER)
-    find_package(OpenCV REQUIRED)
+    find_package(OpenCV REQUIRED PATHS "D:\\Dependencies\\opencv\\build\\x64\\vc16\\lib" )
 
     include(FindPkgConfig)
     pkg_search_module(GSTREAMER REQUIRED gstreamer-1.0)

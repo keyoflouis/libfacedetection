@@ -1,8 +1,14 @@
 #include <iostream>
 #include <cstring>
+#ifndef CUDA_HEADER
+	#define CUDA_HEADER	
+
 #include "cuda.h"
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
+#endif // !1
+
+
 class CDataBlobKernel
 {
 public:
@@ -41,7 +47,17 @@ public:
 					  << _channels << std::endl;
 		}
 	}
+	CDataBlobKernel(const CDataBlobKernel& in) {
+		this->rows = in.rows;
+		this->cols = in.cols;
+		this->channels = in.channels;
+		this->channelStep = in.channelStep;
 
+		size_t size_bytes = size_t(rows) * cols * channelStep;
+
+		this->data = (float*)malloc(size_bytes);
+		std::memcpy(this->data, in.data, size_bytes);
+	}
 	~CDataBlobKernel()
 	{
 	}
@@ -140,3 +156,36 @@ CDataBlobKernel* convolution_1x1pointwiseKernel(int input_rows,
 									int output_channels,
 									int output_channelStep,
 									float *output_data);
+
+class oopBlobToKernel {
+public:
+	CDataBlobKernel hostCDataBlob;
+	CDataBlobKernel* devCDataBlob;
+	size_t size_inbytes_Data ;
+	float* devdata;
+
+	oopBlobToKernel(const CDataBlobKernel& hostCDataBlob) {
+		this->hostCDataBlob = hostCDataBlob;
+		size_inbytes_Data = size_t(hostCDataBlob.rows) * hostCDataBlob.cols * hostCDataBlob.channelStep;
+
+		cudaMalloc((void**)&this->devCDataBlob, sizeof(CDataBlobKernel));
+
+		// allocate
+		
+		cudaMemcpy(this->devCDataBlob, &hostCDataBlob, sizeof(CDataBlobKernel), cudaMemcpyHostToDevice);
+
+
+		// deep copy 
+		cudaMalloc((void**)&this->devdata, size_inbytes_Data);
+		cudaMemcpy(this->devdata, hostCDataBlob.data, size_inbytes_Data, cudaMemcpyHostToDevice);
+		cudaMemcpy(&this->devCDataBlob->data, &this->devdata, sizeof(float*), cudaMemcpyHostToDevice);
+
+	}
+
+	~oopBlobToKernel()
+	{
+		// free
+		cudaFree(this->devdata);
+		cudaFree(this->devCDataBlob);
+	}
+};

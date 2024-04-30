@@ -196,3 +196,5 @@ cuda_log.txt
 
 build-cuda/
 build-cpu/
+
+out/
